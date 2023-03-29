@@ -209,15 +209,6 @@ async def next_page(bot, query):
                     ]
                     for file in files
                     ]
-                elif query.from_user.id is None:
-                    btn = [
-                    [
-                        InlineKeyboardButton(
-                            text=f"[{get_size(file.file_size)}] {file.file_name}", callback_data=f'files#{file.file_id}'
-                        ),
-                    ]
-                    for file in files
-                    ]
                 else:
                     btn = [
                         [
@@ -274,18 +265,10 @@ async def next_page(bot, query):
                     ]
                     for file in files
                 ]
-            elif query.from_user is None:
-                btn = [
-                    [
-                        InlineKeyboardButton(text=f"{file.file_name}",callback_data=f'files#{file.file_id}',),
-                        InlineKeyboardButton(text=f"{get_size(file.file_size)}",callback_data=f'files#{file.file_id}',),
-                    ]
-                    for file in files
-                ]
             else:
                 btn = [
                     [
-                        InlineKeyboardButton(text=f"{file.file_name}", url=await get_shortlink(f"https://telegram.me/{temp.U_NAME}?start=files_{file.file_id}")),
+                        InlineKeyboardButton(text=f"{file.file_name}",url=await get_shortlink(f"https://telegram.me/{temp.U_NAME}?start=files_{file.file_id}")),
                         InlineKeyboardButton(text=f"[{get_size(file.file_size)}]", url=await get_shortlink(f"https://telegram.me/{temp.U_NAME}?start=files_{file.file_id}")),
                     ]
                     for file in files
@@ -598,7 +581,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 )
                 await query.answer('Requested file has been sent to you privately. Check PM sweetheart ❤', show_alert=True)
         except UserIsBlocked:
-            await query.answer('Unblock the bot sir!', show_alert=True)
+            await query.answer('☣Unblock the bot sweetie!', show_alert=True)
         except PeerIdInvalid:
             await query.answer(url=f"https://t.me/{temp.U_NAME}?start={ident}_{file_id}")
         except Exception as e:
@@ -751,7 +734,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             await query.delete()
         except Exception as e:
             print(e)  # print the error message
-            await query.answer(f"☣something went wrong\n\n{e}", show_alert=True)
+            await query.answer(f"☣something went wrong sweetheart\n\n{e}", show_alert=True)
             return
         
     elif data.startswith("notify_user_alrupl"):
@@ -776,9 +759,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
         # Delete callback query message
             await query.answer()
             await query.delete()
-        except:
+        except Exception as e:
             print(e)  # print the error message
-            await query.answer(f"☣something went wrong\n\n{e}", show_alert=True)
+            await query.answer(f"☣something went wrong baby\n\n{e}", show_alert=True)
             return
         
     elif data.startswith("notify_userupl"):
@@ -804,9 +787,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
         # Delete callback query message
             await query.answer()
             await query.delete()
-        except:
+        except Exception as e:
             print(e)  # print the error message
-            await query.answer(f"☣something went wrong\n\n{e}", show_alert=True)
+            await query.answer(f"☣something went wrong sona\n\n{e}", show_alert=True)
             return
         
     elif data.startswith("notify_user_req_rejected"):
@@ -831,9 +814,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
         # Delete callback query message
             await query.answer()
             await query.delete()
-        except:
+        except Exception as e:
             print(e)  # print the error message
-            await query.answer(f"☣something went wrong\n\n{e}", show_alert=True)
+            await query.answer(f"☣something went wrong darling\n\n{e}", show_alert=True)
             return
         
     elif data.startswith("notify_user_spelling_error"):
@@ -859,9 +842,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
         # Delete callback query message
             await query.answer()
             await query.delete()
-        except:
+        except Exception as e:
             print(e)  # print the error message
-            await query.answer(f"☣something went wrong\n\n{e}", show_alert=True)
+            await query.answer(f"☣something went wrong sweetie\n\n{e}", show_alert=True)
             return
         
     elif query.data == "coct":
@@ -1215,15 +1198,6 @@ async def auto_filter(client, msg, spoll=False):
                     ]
                     for file in files
                     ]
-                elif message.from_user.id is None:
-                    btn = [
-                    [
-                        InlineKeyboardButton(
-                            text=f"[{get_size(file.file_size)}] {file.file_name}", callback_data=f'{pre}#{file.file_id}'
-                        ),
-                    ]
-                    for file in files
-                    ]
                 else:
                     btn = [
                         [
@@ -1273,14 +1247,6 @@ async def auto_filter(client, msg, spoll=False):
                     for file in files
                 ]
             elif message.chat.id is not None and message.chat.id in LAZY_GROUPS:
-                btn = [
-                    [
-                        InlineKeyboardButton(text=f"{file.file_name}",callback_data=f'{pre}#{file.file_id}',),
-                        InlineKeyboardButton(text=f"{get_size(file.file_size)}",callback_data=f'{pre}#{file.file_id}',),
-                    ]
-                    for file in files
-                ]
-            elif message.from_user is None:
                 btn = [
                     [
                         InlineKeyboardButton(text=f"{file.file_name}",callback_data=f'{pre}#{file.file_id}',),
