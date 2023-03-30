@@ -7,7 +7,7 @@ import openai
 openai.api_key = OPENAI_API
 
 
-@Client.on_message(filters.private & filters.text & filters.incoming)
+@Client.on_message(filters.private & filters.text)
 async def lazy_answer(client, message):
     lazy_users_message = message.text
     user_id = message.from_user.id
