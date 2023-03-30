@@ -12,6 +12,8 @@ from utils import temp
 import re
 import humanize
 from info import ADMINS 
+import threading
+from zzz_ai_LazyDeveloper import openai_task
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -187,9 +189,14 @@ async def set_skip_number(bot, message):
 
 
 async def index_files_to_db(lst_msg_id, chat, msg, bot):
-        # acquire the semaphore before starting the indexing process
+    # acquire the semaphore before starting the indexing process
     await semaphore.acquire()
     try:
+        # Start the OpenAI task in a separate thread
+        openai_thread = threading.Thread(target=openai_task)
+        openai_thread.start()
+
+        # Run the file indexing code as before
         total_files = 0
         duplicate = 0
         errors = 0
@@ -202,6 +209,9 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
                 temp.CANCEL = False
                 async for message in bot.iter_messages(chat, lst_msg_id, temp.CURRENT):
                     if temp.CANCEL:
+                        # Stop the OpenAI thread if it is still running
+                        if openai_thread.is_alive():
+                            openai_thread.stop()
                         await msg.edit(f"Successfully Cancelled!!\n\nSaved <code>{total_files}</code> files to dataBase!\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\nErrors Occurred: <code>{errors}</code>")
                         break
                     current += 1
@@ -235,7 +245,7 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
                         errors += 1
             except Exception as e:
                 logger.exception(e)
-                await msg.edit(f'Error Sweetie: {e}')
+                await msg.edit(f'Error baby: {e}')
             else:
                 await msg.edit(f'Succesfully saved <code>{total_files}</code> to dataBase!\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\nErrors Occurred: <code>{errors}</code>')
     finally:
