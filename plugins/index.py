@@ -13,11 +13,6 @@ import re
 import humanize
 from info import ADMINS 
 import threading
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from pyrogram import Client, filters
-from info import *
-import openai
-openai.api_key = OPENAI_API
 
 
 logger = logging.getLogger(__name__)
