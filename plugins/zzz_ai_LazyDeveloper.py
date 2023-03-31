@@ -33,7 +33,7 @@ async def lazy_answer(client, message):
                 await message.reply(f"{lazy_response}\n\n\n{footer_credit}")
             except Exception as error:
                 print(error)
-                message.reply_text(f'Lazy Bhaiya - Error aa gya 😀\n\n{error}')
+                await message.reply_text(f'Lazy Bhaiya - Error aa gya 😀\n\n{error}')
     else:
         return
     
