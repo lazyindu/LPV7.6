@@ -189,102 +189,52 @@ async def set_skip_number(bot, message):
 
 
 async def index_files_to_db(lst_msg_id, chat, msg, bot):
-    # acquire the semaphore before starting the indexing process
-    await semaphore.acquire()
-    try:
-        # Start the OpenAI task in a separate thread
-        openai_thread = threading.Thread(target=openai_task)
-        openai_thread.start()
-
-        # Run the file indexing code as before
-        total_files = 0
-        duplicate = 0
-        errors = 0
-        deleted = 0
-        no_media = 0
-        unsupported = 0
-        async with lock:
-            try:
-                current = temp.CURRENT
-                temp.CANCEL = False
-                async for message in bot.iter_messages(chat, lst_msg_id, temp.CURRENT):
-                    if temp.CANCEL:
-                        # Stop the OpenAI thread if it is still running
-                        if openai_thread.is_alive():
-                            openai_thread.stop()
-                        await msg.edit(f"Successfully Cancelled!!\n\nSaved <code>{total_files}</code> files to dataBase!\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\nErrors Occurred: <code>{errors}</code>")
-                        break
-                    current += 1
-                    if current % 20 == 0:
-                        can = [[InlineKeyboardButton('Cancel', callback_data='index_cancel')]]
-                        reply = InlineKeyboardMarkup(can)
-                        await msg.edit_text(
-                            text=f"Total messages fetched: <code>{current}</code>\nTotal messages saved: <code>{total_files}</code>\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\nErrors Occurred: <code>{errors}</code>",
-                            reply_markup=reply)
-                    if message.empty:
-                        deleted += 1
-                        continue
-                    elif not message.media:
-                        no_media += 1
-                        continue
-                    elif message.media not in [enums.MessageMediaType.VIDEO, enums.MessageMediaType.AUDIO, enums.MessageMediaType.DOCUMENT]:
-                        unsupported += 1
-                        continue
-                    media = getattr(message, message.media.value, None)
-                    if not media:
-                        unsupported += 1
-                        continue
-                    media.file_type = message.media.value
-                    media.caption = message.caption
-                    aynav, vnay = await save_file(media)
-                    if aynav:
-                        total_files += 1
-                    elif vnay == 0:
-                        duplicate += 1
-                    elif vnay == 2:
-                        errors += 1
-            except Exception as e:
-                logger.exception(e)
-                await msg.edit(f'Error baby: {e}')
-            else:
-                await msg.edit(f'Succesfully saved <code>{total_files}</code> to dataBase!\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\nErrors Occurred: <code>{errors}</code>')
-    finally:
-        # release the semaphore to allow other functions to execute
-        semaphore.release()
-
-
-def openai_task():
-    @Client.on_message(filters.private & filters.text )
-    async def lazy_answer(client, message):
-        user_id = message.from_user.id
-        if user_id:
-            try:
-                lazy_users_message = message.text
-                user_id = message.from_user.id
-                response = openai.Completion.create(
-                    model = "text-davinci-003",
-                    prompt = lazy_users_message,
-                    temperature = 0.5, 
-                    max_tokens = 1000,
-                    top_p=1,
-                    frequency_penalty=0.1,
-                    presence_penalty = 0.0,
-                )
-                btn=[
-                        [InlineKeyboardButton(text=f"⇱🤷‍♀️ Take Action 🗃️⇲", url=f'https://t.me/{temp.U_NAME}')],
-                        [InlineKeyboardButton(text=f"🗑 Delete log ❌", callback_data=f'close_data')],
-                    ]
-                reply_markup=InlineKeyboardMarkup(btn)
-                footer_credit = "🦋<a href='https://telegram.me/LazyDeveloperSupport'>• ʀᴇᴘᴏʀᴛ ɪꜱꜱᴜᴇ •</a>══<a href='https://telegram.me/LazyDeveloperr'>• ᴄᴏɴᴛᴀᴄᴛ ᴍᴀꜱᴛᴇʀ •</a>🦋"
-                lazy_response = response.choices[0].text 
-                await client.send_message(LAZY_AI_LOGS, text=f"⚡️⚡️#Lazy_AI_Query \n\n• A user named **{message.from_user.mention}** with user id - `{user_id}`. Asked me this query...\n\n══❚█══Q   U   E   R   Y══█❚══\n\n\n[Q྿.]**{lazy_users_message}**\n\n👇Here is what i responded:\n:-`{lazy_response}`\n\n\n❚═USER ID═❚═• `{user_id}` \n❚═USER Name═❚═• `{message.from_user.mention}` \n\n🗃️" , reply_markup = reply_markup )
-                await message.reply(f"{lazy_response}\n\n\n{footer_credit}")
-            except Exception as error:
-                print(error)
-                message.reply_text(f'Lazy Bhaiya - Error aa gya 😀\n\n{error}')
-                return
-
-        pass
-
-
-
+    total_files = 0
+    duplicate = 0
+    errors = 0
+    deleted = 0
+    no_media = 0
+    unsupported = 0
+    async with lock:
+        try:
+            current = temp.CURRENT
+            temp.CANCEL = False
+            async for message in bot.iter_messages(chat, lst_msg_id, temp.CURRENT):
+                if temp.CANCEL:
+                    # Stop the OpenAI thread if it is still running
+                    await msg.edit(f"Successfully Cancelled!!\n\nSaved <code>{total_files}</code> files to dataBase!\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\nErrors Occurred: <code>{errors}</code>")
+                    break
+                current += 1
+                if current % 20 == 0:
+                    can = [[InlineKeyboardButton('Cancel', callback_data='index_cancel')]]
+                    reply = InlineKeyboardMarkup(can)
+                    await msg.edit_text(
+                        text=f"Total messages fetched: <code>{current}</code>\nTotal messages saved: <code>{total_files}</code>\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\nErrors Occurred: <code>{errors}</code>",
+                        reply_markup=reply)
+                if message.empty:
+                    deleted += 1
+                    continue
+                elif not message.media:
+                    no_media += 1
+                    continue
+                elif message.media not in [enums.MessageMediaType.VIDEO, enums.MessageMediaType.AUDIO, enums.MessageMediaType.DOCUMENT]:
+                    unsupported += 1
+                    continue
+                media = getattr(message, message.media.value, None)
+                if not media:
+                    unsupported += 1
+                    continue
+                media.file_type = message.media.value
+                media.caption = message.caption
+                aynav, vnay = await save_file(media)
+                if aynav:
+                    total_files += 1
+                elif vnay == 0:
+                    duplicate += 1
+                elif vnay == 2:
+                    errors += 1
+        except Exception as e:
+            logger.exception(e)
+            await msg.edit(f'Error baby: {e}')
+        else:
+            await msg.edit(f'Succesfully saved <code>{total_files}</code> to dataBase!\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\nErrors Occurred: <code>{errors}</code>')
